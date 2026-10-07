@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portfolio | Hussein Ahsan</title>
+<meta name="description" content="All of Hussein Ahsan's work: coffee, mojitos, mocktails, desserts and video.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Allura&family=Poppins:wght@200;300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav id="nav" class="solid">
+  <a href="index.html" class="logo"><span class="script">Hussein Ahsan</span><small>barista</small></a>
+  <a class="cta nav-cta ghost" href="https://wa.me/9647712819224" target="_blank" rel="noopener">WhatsApp</a>
+</nav>
+
+<header class="pf-head">
+  <div class="wrap">
+    <div>
+      <a class="back" href="index.html">← Back home</a>
+      <h1 class="title" style="font-size:clamp(2.6rem,7vw,5.4rem);margin-top:18px">the<span class="script">full</span>portfolio</h1>
+    </div>
+    <p style="color:var(--muted);font-size:.85rem;max-width:300px">Every photo and video in one place. Tap anything to see it large.</p>
+  </div>
+</header>
+
+<main class="pf">
+  <div class="featured" id="featured"></div>
+
+  <div class="bar">
+    <h2>All work <span id="count" style="color:var(--dim);font-size:.9rem"></span></h2>
+    <div class="chips" id="chips"></div>
+  </div>
+  <div class="masonry" id="all"></div>
+</main>
+
+<footer><a href="https://www.instagram.com/husseinvers/" target="_blank" rel="noopener">@husseinvers</a> · © 2026 Hussein Ahsan</footer>
+
+<div class="lb2" id="lb">
+  <div class="stage" id="stage"></div>
+  <p class="cap" id="cap"></p>
+  <button class="x" aria-label="Close">✕</button>
+  <button class="pv" aria-label="Previous">←</button>
+  <button class="nx" aria-label="Next">→</button>
+</div>
+
+<script>
+  // featured: true puts it in the top block (first 4 used)
+  const WORK = [
+    {src:"reel-2.mp4", t:"On the shaker", c:"Video", video:true, featured:true},
+    {src:"hussein-garnish.jpg", t:"Garnishing the Purple Mocktail", c:"Drinks", featured:true},
+    {src:"latte-art.jpg", t:"Latte Art", c:"Coffee", featured:true},
+    {src:"reel.mp4", t:"Lemon & mint, in the making", c:"Video", video:true, featured:true},
+    {src:"coconut-mojito.jpg", t:"Lemon & Mint Mojito", c:"Drinks"},
+    {src:"layered-coconut.jpg", t:"Purple Mocktail", c:"Drinks"},
+    {src:"hibiscus-lemonade.jpg", t:"Karkadeh", c:"Drinks"},
+    {src:"blue-lagoon.jpg", t:"Kiwi Lemonade", c:"Drinks"},
+    {src:"apple-iced-tea.jpg", t:"Spark Energy", c:"Drinks"},
+    {src:"tiramisu.jpg", t:"Tiramisu", c:"Desserts"},
+    {src:"cheesecake-mulberry.jpg", t:"Cheesecake with jam & mulberries", c:"Desserts"},
+    {src:"cheesecake-blueberry.jpg", t:"Blueberry Cheesecake", c:"Desserts"},
+    {src:"gelato-1.jpg", t:"Gelato display", c:"Desserts"},
+    {src:"gelato-2.jpg", t:"Gelato display", c:"Desserts"}
+  ];
+  const media=(w,big)=>w.video
+    ? `<video src="assets/${w.src}" muted loop playsinline autoplay preload="metadata"></video><span class="play">▶</span>`
+    : `<img src="assets/${w.src}" alt="${w.t}" loading="${big?'eager':'lazy'}">`;
+  const tile=(w,i,big)=>`<button class="tile" data-i="${i}" data-c="${w.c}">${media(w,big)}<span class="lbl"><small>${w.c}</small>${w.t}</span></button>`;
+
+  document.getElementById('featured').innerHTML=WORK.map((w,i)=>w.featured?tile(w,i,true):'').join('');
+  const all=document.getElementById('all');
+  all.innerHTML=WORK.map((w,i)=>tile(w,i)).join('');
+
+  const cats=["All","Coffee","Drinks","Desserts","Video"], chips=document.getElementById('chips'), count=document.getElementById('count');
+  chips.innerHTML=cats.map(c=>`<button class="chip${c==="All"?" on":""}" data-c="${c}">${c}</button>`).join('');
+  const filter=c=>{let n=0;all.querySelectorAll('.tile').forEach(t=>{const show=c==="All"||t.dataset.c===c;t.classList.toggle('hide',!show);n+=show});
+    count.textContent=`(${n})`;chips.querySelectorAll('.chip').forEach(b=>b.classList.toggle('on',b.dataset.c===c))};
+  chips.addEventListener('click',e=>{const b=e.target.closest('.chip');if(b)filter(b.dataset.c)});
+  filter("All");
+
+  // lightbox steps through whatever is currently visible in "All work"
+  const lb=document.getElementById('lb'), stage=document.getElementById('stage'), cap=document.getElementById('cap');
+  let list=[], pos=0;
+  const show=()=>{const w=WORK[list[pos]];
+    stage.innerHTML=w.video?`<video src="assets/${w.src}" controls autoplay playsinline></video>`:`<img src="assets/${w.src}" alt="${w.t}">`;
+    cap.textContent=w.t};
+  const open=i=>{list=[...all.querySelectorAll('.tile:not(.hide)')].map(t=>+t.dataset.i);
+    if(!list.includes(i))list=WORK.map((_,k)=>k);pos=list.indexOf(i);show();lb.classList.add('open')};
+  const close=()=>{lb.classList.remove('open');stage.innerHTML=''};
+  const step=d=>{pos=(pos+d+list.length)%list.length;show()};
+  document.addEventListener('click',e=>{const t=e.target.closest('.tile');if(t)open(+t.dataset.i)});
+  lb.querySelector('.x').onclick=close; lb.querySelector('.pv').onclick=()=>step(-1); lb.querySelector('.nx').onclick=()=>step(1);
+  lb.addEventListener('click',e=>{if(e.target===lb||e.target===stage)close()});
+  addEventListener('keydown',e=>{if(!lb.classList.contains('open'))return;if(e.key==='Escape')close();if(e.key==='ArrowRight')step(1);if(e.key==='ArrowLeft')step(-1)});
+</script>
+</body>
+</html>
